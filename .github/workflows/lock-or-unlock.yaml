@@ -18,7 +18,7 @@ on:
         required: false
 
 jobs:
-  release:
+  lock-or-unlock:
     runs-on: ubuntu-latest
     steps:
       - name: Determine which mode should perform
