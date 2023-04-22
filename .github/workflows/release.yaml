@@ -1,0 +1,13 @@
+name: Release
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create a release
+        run: gh release create $(date +%Y%m%d%H%M%S.0.0) --generate-notes
