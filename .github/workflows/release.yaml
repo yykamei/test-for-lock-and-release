@@ -15,4 +15,5 @@ jobs:
       - name: Create a release
         run: gh release create v$(date +%Y%m%d%H%M%S.0.0) --generate-notes
         env:
+          TZ: Asia/Tokyo
           GITHUB_TOKEN: ${{ github.token }}
