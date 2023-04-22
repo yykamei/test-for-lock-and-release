@@ -18,7 +18,7 @@ on:
         required: false
 
 jobs:
-  release:
+  lock-or-unlock:
     runs-on: ubuntu-latest
     steps:
       - name: Determine which mode should perform
@@ -33,23 +33,16 @@ jobs:
       - name: Lock
         if: steps.meta.outputs.mode == 'lock'
         run: |
-          context="[LOCKED] ${{ steps.meta.outputs.reason }}"
-          echo "{\"contexts\":[\"$context\"]}" | gh api -X POST repos/${{ github.repository }}/branches/main/protection/required_status_checks/contexts --input -
-          echo $context > /tmp/context.txt
+          echo '{"contexts":["[LOCKED] ${{ steps.meta.outputs.reason }}"]}' | \
+            gh api -X POST repos/${{ github.repository }}/branches/main/protection/required_status_checks/contexts --input -
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
-      - uses: actions/upload-artifact@v3
-        if: steps.meta.outputs.mode == 'lock'
-        with:
-          name: lock
-          path: /tmp/context.txt
-      - uses: actions/download-artifact@v3
-        if: steps.meta.outputs.mode == 'unlock'
-        with:
-          name: lock
-          path: /tmp/context.txt
       - name: Unock
         if: steps.meta.outputs.mode == 'unlock'
-        run: echo "{\"contexts\":[\"$(cat /tmp/context.txt)\"]}" | gh api -X DELETE repos/${{ github.repository }}/branches/main/protection/required_status_checks/contexts --input -
+        run: |
+          context=$(gh api repos/${{ github.repository }}/branches/main/protection/required_status_checks/contexts --jq '.[]' | grep '[LOCKED]')
+          if [[ -n "$context" ]]; then
+            echo "{\"contexts\":[\"${context}\"]}" | gh api -X DELETE repos/${{ github.repository }}/branches/main/protection/required_status_checks/contexts --input -
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
