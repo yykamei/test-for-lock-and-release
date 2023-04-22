@@ -13,6 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Create a release
-        run: gh release create $(date +%Y%m%d%H%M%S.0.0) --generate-notes
+        run: gh release create v$(date +%Y%m%d%H%M%S.0.0) --generate-notes
         env:
           GITHUB_TOKEN: ${{ github.token }}
